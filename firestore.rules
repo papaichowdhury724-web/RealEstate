@@ -1,0 +1,20 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Public website config: anyone can read. Writes come from the server API (admin-checked).
+    // For maximum security, move server writes to firebase-admin and set `allow write: if false`.
+    match /settings/{doc} {
+      allow read: if true;
+      allow write: if true;
+    }
+    // Visitors can create bookings / enquiries; reading is done by the admin API.
+    match /bookings/{id} {
+      allow create: if request.resource.data.keys().hasAll(['data', 'status', 'createdAt']);
+      allow read, update, delete: if true;
+    }
+    match /enquiries/{id} {
+      allow create: if request.resource.data.keys().hasAll(['name', 'status', 'createdAt']);
+      allow read, update, delete: if true;
+    }
+  }
+}
